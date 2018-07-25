@@ -11,15 +11,17 @@ import (
 	"github.com/DataDog/datadog-trace-agent/info"
 	"github.com/DataDog/datadog-trace-agent/model"
 	"github.com/DataDog/datadog-trace-agent/model/zipkin"
+	"github.com/DataDog/datadog-trace-agent/model/zipkin/zipkinv1"
 
+	"github.com/apache/thrift/lib/go/thrift"
 	log "github.com/cihub/seelog"
 )
 
 // tagZipkinHandler is the metrics tag used for the Zipkin span handler.
 const tagZipkinHandler = "handler:zipkin"
 
-// handleZipkinSpans handles the endpoint accepting Zipkin spans.
-func (r *HTTPReceiver) handleZipkinSpans(w http.ResponseWriter, req *http.Request) {
+// handleZipkinV2Spans handles the endpoint accepting Zipkin V2 spans.
+func (r *HTTPReceiver) handleZipkinSpansV2(w http.ResponseWriter, req *http.Request) {
 	switch v := req.Header.Get("Content-Type"); v {
 	case "application/json", "text/json":
 		// OK
@@ -119,4 +121,35 @@ func tracesFromZipkinSpans(zipkinSpans []*zipkin.SpanModel) model.Traces {
 		traces = append(traces, t)
 	}
 	return traces
+}
+
+// tagZipkinHandlerV1 is the metrics tag used for the Zipkin span handler.
+const tagZipkinHandlerV1 = "handler:zipkin_v1"
+
+// handleZipkinV1Spans handles the endpoint accepting Zipkin V1 spans.
+func (r *HTTPReceiver) handleZipkinSpansV1(w http.ResponseWriter, req *http.Request) {
+	if v := req.Header.Get("Content-Type"); v != "application/x-thrift" {
+		log.Errorf("/zipkin/v1/spans: unsupported media type %q", v)
+		HTTPFormatError([]string{tagZipkinHandlerV1}, w)
+		return
+	}
+	trans := thrift.NewStreamTransportR(req.Body)
+	proto := thrift.NewTBinaryProtocolTransport(trans)
+	_, size, err := proto.ReadListBegin()
+	if err != nil {
+		log.Errorf("/zipkin/v1/spans: cannot decode list header: %v", err)
+		HTTPDecodingError(err, []string{tagZipkinHandlerV1}, w)
+		return
+	}
+	spans := make([]*zipkinv1.Span, size)
+	for i := range spans {
+		span := zipkinv1.NewSpan()
+		if err := span.Read(proto); err != nil {
+			log.Errorf("/zipkin/v1/spans: cannot decode span: %v", err)
+			HTTPDecodingError(err, []string{tagZipkinHandlerV1}, w)
+			return
+		}
+		spans[i] = span
+	}
+	fmt.Printf("\n%#v\n", spans)
 }

@@ -106,7 +106,8 @@ func (r *HTTPReceiver) Run() {
 
 	// Zipkin v2 endpoint
 	// TODO(gbbr): disable by default, add yaml flag
-	http.HandleFunc("/zipkin/v2/spans", r.httpHandle(r.handleZipkinSpans))
+	http.HandleFunc("/zipkin/v1/spans", r.httpHandle(r.handleZipkinSpansV1))
+	http.HandleFunc("/zipkin/v2/spans", r.httpHandle(r.handleZipkinSpansV2))
 
 	// expvar implicitely publishes "/debug/vars" on the same port
 	addr := fmt.Sprintf("%s:%d", r.conf.ReceiverHost, r.conf.ReceiverPort)

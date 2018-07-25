@@ -17,6 +17,12 @@
   revision = "ea383cf3ba6ec950874b8486cd72356d007c768f"
 
 [[projects]]
+  name = "github.com/apache/thrift"
+  packages = ["lib/go/thrift"]
+  revision = "327ebb6c2b6df8bf075da02ef45a2a034e9b79ba"
+  version = "0.11.0"
+
+[[projects]]
   name = "github.com/cihub/seelog"
   packages = ["."]
   revision = "d2c6e5aa9fbfdd1c624e140287063c7730654115"
@@ -102,6 +108,12 @@
   revision = "362bfb3384d53ae4d5dd745983a4d70b6d23628c"
 
 [[projects]]
+  branch = "master"
+  name = "golang.org/x/net"
+  packages = ["context"]
+  revision = "3673e40ba22529d22c3fd7c93e97b0ce50fa7bdd"
+
+[[projects]]
   name = "golang.org/x/sys"
   packages = [
     "windows",
@@ -121,6 +133,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b5835767ec41c879ca5cf6a446e52ccc4ea1bb23f3ae4101356e86a4c092f137"
+  inputs-digest = "434623611387df52d61f4194b7024ffe53f11e4c57a040f6b8e0ce823eafc3f5"
   solver-name = "gps-cdcl"
   solver-version = 1
