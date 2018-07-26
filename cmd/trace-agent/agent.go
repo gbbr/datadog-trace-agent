@@ -19,10 +19,7 @@ import (
 	"github.com/DataDog/datadog-trace-agent/writer"
 )
 
-const (
-	processStatsInterval = time.Minute
-	samplingPriorityKey  = "_sampling_priority_v1"
-)
+const processStatsInterval = time.Minute
 
 type processedTrace struct {
 	Trace         model.Trace
@@ -193,7 +190,7 @@ func (a *Agent) Process(t model.Trace) {
 		samplers = append(samplers, a.ScoreSampler)
 	}
 
-	priority, hasPriority := root.Metrics[samplingPriorityKey]
+	priority, hasPriority := root.Metrics[model.SamplingPriorityKey]
 	if hasPriority {
 		// If Priority is defined, send to priority sampling, regardless of priority value.
 		// The sampler will keep or discard the trace, but we send everything so that it
